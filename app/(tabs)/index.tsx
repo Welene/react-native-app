@@ -1,10 +1,18 @@
 // FIRST TAB SECTION
 import { Text, View } from 'react-native';
+import logo from '../assets/logo/min1.png';
+import Header from '../components/Header';
 
 export default function HomeScreen() {
 	return (
-		<View>
-			<Text>THIS IS THE FIRST PAGE/TAB!</Text>
+		<View style={{ flex: 1 }}>
+			<Header
+				logo={logo}
+				onMenuPress={() => console.log('menu is pressed')}
+			/>
+			<View>
+				<Text>THIS IS THE FIRST PAGE/TAB!</Text>
+			</View>
 		</View>
 	);
 }
