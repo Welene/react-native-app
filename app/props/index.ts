@@ -15,6 +15,11 @@ export type MenuItem = {
 	onPress: () => void;
 };
 
+export type addVideoBtn = {
+	label: string;
+	onPress?: () => void;
+};
+
 // export type HomepageProps = {
 // 	nature: ImageSourcePropType;
 // };
