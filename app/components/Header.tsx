@@ -1,15 +1,15 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { HeaderProps } from '../props';
 
 const Header: React.FC<HeaderProps> = ({ logo, onMenuPress }) => {
 	return (
 		<View style={styles.header}>
 			<Image source={logo} style={styles.logo} />
-			<TouchableOpacity onPress={onMenuPress} style={styles.hamburger}>
+			<Pressable onPress={onMenuPress} style={styles.hamburger}>
 				<MaterialIcons name="menu" size={28} color="black" />
-			</TouchableOpacity>
+			</Pressable>
 		</View>
 	);
 };

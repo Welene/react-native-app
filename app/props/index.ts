@@ -5,6 +5,7 @@ import { ImageSourcePropType } from 'react-native'; /*(for images, jpg, png)*/
 // ------------------ HEADER SECTION ---------------------
 export type HeaderProps = {
 	logo: ImageSourcePropType;
+
 	onMenuPress: () => void;
 };
 
@@ -13,3 +14,7 @@ export type MenuItem = {
 	label: string;
 	onPress: () => void;
 };
+
+// export type HomepageProps = {
+// 	nature: ImageSourcePropType;
+// };
