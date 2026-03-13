@@ -20,6 +20,15 @@ export type addVideoBtn = {
 	onPress?: () => void;
 };
 
+export type Clip = {
+	id: number;
+	uri: string;
+	duration?: number;
+	fileName?: string;
+	startTime: number;
+	segmentLength: number;
+};
+
 // export type HomepageProps = {
 // 	nature: ImageSourcePropType;
 // };
