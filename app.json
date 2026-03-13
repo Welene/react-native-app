@@ -1,12 +1,19 @@
 {
-	"expo": {
-		"name": "my-millionth-native-app",
-		"slug": "my-millionth-native-app",
-		"version": "1.0.0",
-		"platforms": ["ios", "android", "web"],
-		"orientation": "portrait",
-		"scheme": "mymillionthnativeapp",
-		"userInterfaceStyle": "automatic",
-		"plugins": ["expo-router"]
-	}
+  "expo": {
+    "name": "my-millionth-native-app",
+    "slug": "my-millionth-native-app",
+    "version": "1.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "orientation": "portrait",
+    "scheme": "mymillionthnativeapp",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-router",
+      "expo-video"
+    ]
+  }
 }

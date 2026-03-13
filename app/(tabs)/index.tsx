@@ -2,7 +2,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router'; // for onPress nav to a different tab
 import { Image, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
-import logo from '../assets/logo/min2.png';
+import logo from '../assets/logo/min5.png';
 import nature from '../assets/logo/MockupImg.png';
 import Header from '../components/Header';
 
@@ -81,11 +81,13 @@ export default function HomeScreen() {
 					onPress={() => router.navigate('projects')}
 					style={styles.button}>
 					<LinearGradient
-						colors={['#FFB34A', '#FF60F4']}
+						colors={['#ffc26d', '#fc8ed2']}
 						start={{ x: 0, y: 0 }}
 						end={{ x: 1, y: 0 }}
 						style={styles.gradient}>
-						<Text style={styles.buttonText}>Start new Project</Text>
+						<Text style={styles.buttonText}>
+							Start new project +
+						</Text>
 					</LinearGradient>
 				</Pressable>
 			</ScrollView>
@@ -104,6 +106,7 @@ const styles = StyleSheet.create({
 	image: {
 		width: '100%',
 		height: 180,
+		opacity: 0.8,
 		borderRadius: 8,
 	},
 	scroll: {
