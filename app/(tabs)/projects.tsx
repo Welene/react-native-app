@@ -2,7 +2,7 @@
 
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import logo from '../assets/logo/min5.png';
 import AddVideoBtn from '../components/AddVideoBtn';
 import Header from '../components/Header';
@@ -51,36 +51,49 @@ export default function TabTwoScreen() {
 				onMenuPress={() => console.log('menu is pressed')}
 			/>
 			<View style={styles.preview}>
+				<Text>PREVIEW SECTION AKA BIG VIDEO</Text>
 				{/* STOR PREVIEW VIDEO BOKS - SPILLER AV VIDEOER MAN HAR LAGT TIL OM MAN TRYKKER PÅ PLAY */}
 			</View>
-			<View style={styles.collection}>
-				{clips.map((clip) => {
-					return <NewClipContainer key={clip.id} uri={clip.uri} />;
-				})}
-			</View>
+			<ScrollView style={styles.scrollClips} horizontal={true}>
+				<View style={styles.collection}>
+					{clips.map((clip) => {
+						return (
+							<NewClipContainer key={clip.id} uri={clip.uri} />
+						);
+					})}
+				</View>
+			</ScrollView>
 			<View style={styles.addVideo}>
-				<Text> TAB TWO</Text>
 				<AddVideoBtn label="Add video" onPress={chooseImages} />
 			</View>
+			<View style={styles.timeline}></View>
 		</>
 	);
 }
 
 const styles = StyleSheet.create({
 	preview: {
-		width: '90%',
-		height: 80,
+		width: '100%',
+		height: 170,
+		backgroundColor: 'pink',
 	},
 	collection: {
 		flexDirection: 'row',
-		gap: 10,
-		width: '90%',
-		height: 100,
+		margin: 10,
+		// width: '90%',
+		// height: 100,
 	},
 	addVideo: {
 		width: '100%',
 		display: 'flex',
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
+	},
+	scrollClips: {
+		height: 50,
+	},
+	timeline: {
+		width: '100%',
+		height: 150,
 	},
 });
