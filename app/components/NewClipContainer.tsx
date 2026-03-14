@@ -9,8 +9,9 @@ function NewClipContainer({ uri }: { uri: string }) {
 
 const styles = StyleSheet.create({
 	videoView: {
-		height: 120,
-		margin: 10,
+		height: 100,
+		width: 100,
+		// margin: 10,
 	},
 });
 

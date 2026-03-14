@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'flex-end',
 	},
 	scrollClips: {
-		height: 50,
+		height: 150,
 	},
 	timeline: {
 		width: '100%',
