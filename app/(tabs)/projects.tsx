@@ -1,6 +1,7 @@
 // SECOND TAB SECTION
 
 import * as ImagePicker from 'expo-image-picker';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import logo from '../assets/logo/min5.png';
@@ -11,6 +12,9 @@ import { Clip } from '../props';
 
 export default function TabTwoScreen() {
 	const [clips, setClips] = useState<Clip[]>([]); // uses the prop Clip - ts knows clips is an [] of Clip objects
+
+	const latestClip = clips.length > 0 ? clips[clips.length - 1] : null; // fetches last video in []
+	const previewVideo = useVideoPlayer(latestClip?.uri ?? ''); // show video using useVideoPlayer
 
 	const chooseImages = async () => {
 		let result = await ImagePicker.launchImageLibraryAsync({
@@ -51,8 +55,14 @@ export default function TabTwoScreen() {
 				onMenuPress={() => console.log('menu is pressed')}
 			/>
 			<View style={styles.preview}>
-				<Text>PREVIEW SECTION AKA BIG VIDEO</Text>
-				{/* STOR PREVIEW VIDEO BOKS - SPILLER AV VIDEOER MAN HAR LAGT TIL OM MAN TRYKKER PÅ PLAY */}
+				{latestClip ? (
+					<VideoView
+						player={previewVideo}
+						style={styles.previewVideo}
+					/>
+				) : (
+					<Text>Select a video to preview</Text>
+				)}
 			</View>
 			<ScrollView style={styles.scrollClips} horizontal={true}>
 				<View style={styles.collection}>
@@ -76,6 +86,10 @@ const styles = StyleSheet.create({
 		width: '100%',
 		height: 170,
 		backgroundColor: 'pink',
+	},
+	previewVideo: {
+		width: '100%',
+		height: '100%',
 	},
 	collection: {
 		flexDirection: 'row',

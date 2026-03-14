@@ -1,18 +1,24 @@
 import { VideoView, useVideoPlayer } from 'expo-video';
 import React from 'react';
-import { StyleSheet } from 'react-native';
-
+import { StyleSheet, View } from 'react-native';
 function NewClipContainer({ uri }: { uri: string }) {
 	const videoPlayer = useVideoPlayer(uri);
-	return <VideoView player={videoPlayer} style={styles.videoView} />;
+	return (
+		<View style={styles.clip}>
+			<VideoView player={videoPlayer} style={styles.video} />
+		</View>
+	);
 }
 
 const styles = StyleSheet.create({
-	videoView: {
-		height: 100,
+	clip: {
 		width: 100,
-		// margin: 10,
+		height: 100,
+		borderRadius: 8,
+		overflow: 'hidden',
+		margin: 10,
 	},
+	video: { width: '100%', height: '100%' },
 });
 
 export default NewClipContainer;
