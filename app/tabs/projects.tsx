@@ -7,12 +7,18 @@ import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useEffect, useState } from 'react';
 import {
 	Image,
+	ImageSourcePropType,
 	Pressable,
 	ScrollView,
 	StyleSheet,
 	Text,
 	View,
 } from 'react-native'; // in Native you have to import all elements you use
+import DraggableFlatList from 'react-native-draggable-flatlist';
+import iconDuration from '../assets/icons/duration.png';
+import iconExport from '../assets/icons/export.png';
+import iconMusic from '../assets/icons/music.png';
+import iconMute from '../assets/icons/mute.png';
 import logo from '../assets/logo/min5.png';
 import AddVideoBtn from '../components/AddVideoBtn';
 import Header from '../components/Header';
@@ -21,6 +27,7 @@ import { Clip } from '../props';
 export default function TabTwoScreen() {
 	const [clips, setClips] = useState<Clip[]>([]); // uses the prop Clip - ts knows clips is an [] of Clip objects
 	const [currentlyClicked, setCurrentlyClicked] = useState<Clip | null>(null); // remembers which clip is clicked so it shows up in previewVideo - overrides latestClip
+	const [timelineClips, setTimelineClips] = useState<Clip[]>([]); // clips that are added to the timeline - starts as empty [] and gets filled with clips that are added to timeline
 
 	const clipToPreview = currentlyClicked ?? clips[clips.length - 1] ?? null;
 	const previewPlayer = useVideoPlayer(clipToPreview?.uri ?? '');
@@ -82,6 +89,13 @@ export default function TabTwoScreen() {
 		});
 	}, [clips]);
 
+	const icons: { src: ImageSourcePropType; name: string }[] = [
+		{ src: iconMute, name: 'Mute' },
+		{ src: iconExport, name: 'Export' },
+		{ src: iconMusic, name: 'Music' },
+		{ src: iconDuration, name: 'Duration' },
+	];
+
 	// --------------------------------------------------------------------------------------------------------------------------------
 	// ------------------------------------------- RENDER STUFF ON PAGE SECTION -------------------------------------------------------
 
@@ -91,69 +105,131 @@ export default function TabTwoScreen() {
 				logo={logo}
 				onMenuPress={() => console.log('menu is pressed')}
 			/>
-			<View style={styles.preview}>
+			<ScrollView>
+				<View style={styles.preview}>
+					<LinearGradient
+						colors={['#ffc26d', '#fc8ed2']}
+						start={{ x: 0, y: 0 }}
+						end={{ x: 1, y: 0 }}>
+						{clipToPreview ? (
+							<VideoView
+								player={previewPlayer}
+								style={styles.previewVideo}
+							/>
+						) : (
+							<Text>Select a video to preview</Text>
+						)}
+					</LinearGradient>
+				</View>
+
+				{/* MINI CLIP COLLECTION FROM GALLERY SECTION */}
+				<ScrollView style={styles.scrollClips} horizontal={true}>
+					<View style={styles.collection}>
+						{clips.map((clip) => {
+							return (
+								<Pressable
+									key={clip.id}
+									onPress={() => {
+										setCurrentlyClicked(clip); // shows in preview
+										setTimelineClips((prev) => [
+											...prev,
+											clip,
+										]); // adds to timeline
+										console.log(
+											'CLIP ADDED TO TIMELINE STATE NOW',
+											timelineClips,
+										);
+									}}>
+									{thumbnails[clip.id] ? (
+										<Image
+											source={{
+												uri: thumbnails[clip.id],
+											}}
+											style={{
+												width: 80,
+												height: 80,
+												borderRadius: 8,
+												margin: 10,
+											}}
+										/>
+									) : (
+										<LinearGradient
+											colors={['#ffc26d', '#fc8ed2']}
+											start={{ x: 0, y: 0 }}
+											end={{ x: 1, y: 0 }}
+											style={{
+												width: 80,
+												height: 80,
+												borderRadius: 8,
+												margin: 10,
+											}}>
+											<View // placeholder mini thumbnail - shows before thumbnail loads
+												style={{
+													width: 100,
+													height: 100,
+													borderRadius: 8,
+													margin: 10,
+												}}></View>
+										</LinearGradient>
+									)}
+								</Pressable>
+							);
+						})}
+					</View>
+				</ScrollView>
+				<View style={styles.addVideo}>
+					<AddVideoBtn label="Add video" onPress={chooseImages} />
+				</View>
+
+				{/* TIMELINE SECTION - CLIPS ADDED FROM THE MINI CLIP COLLECTION */}
 				<LinearGradient
 					colors={['#ffc26d', '#fc8ed2']}
 					start={{ x: 0, y: 0 }}
 					end={{ x: 1, y: 0 }}>
-					{clipToPreview ? (
-						<VideoView
-							player={previewPlayer}
-							style={styles.previewVideo}
-						/>
-					) : (
-						<Text>Select a video to preview</Text>
-					)}
-				</LinearGradient>
-			</View>
-			<ScrollView style={styles.scrollClips} horizontal={true}>
-				<View style={styles.collection}>
-					{clips.map((clip) => {
-						return (
-							<Pressable
-								key={clip.id}
-								onPress={() => setCurrentlyClicked(clip)}>
-								{thumbnails[clip.id] ? (
+					<DraggableFlatList
+						data={timelineClips}
+						keyExtractor={(item) => item.id.toString()}
+						horizontal
+						renderItem={({ item, drag, isActive }) => (
+							<View>
+								<Pressable
+									onLongPress={drag}
+									style={styles.timeline}>
 									<Image
-										source={{
-											uri: thumbnails[clip.id],
-										}}
+										source={{ uri: thumbnails[item.id] }}
 										style={{
 											width: 100,
 											height: 100,
-											borderRadius: 8,
-											margin: 10,
+											opacity: isActive ? 0.7 : 1,
 										}}
 									/>
-								) : (
-									<LinearGradient
-										colors={['#ffc26d', '#fc8ed2']}
-										start={{ x: 0, y: 0 }}
-										end={{ x: 1, y: 0 }}
-										style={{
-											width: 100,
-											height: 100,
-											borderRadius: 8,
-											margin: 10,
-										}}>
-										<View // placeholder mini thumbnail - shows before thumbnail loads
-											style={{
-												width: 100,
-												height: 100,
-												borderRadius: 8,
-												margin: 10,
-											}}></View>
-									</LinearGradient>
-								)}
+								</Pressable>
+							</View>
+						)}
+						onDragEnd={({ data }) => setTimelineClips(data)}
+					/>
+
+					{/* ICON SECTION */}
+					<View style={styles.iconContainer}>
+						{icons.map((icon, index) => (
+							<Pressable
+								key={index}
+								onPress={() =>
+									console.log(`${icon.name} pressed`)
+								}>
+								<Image
+									source={icon.src}
+									style={{
+										width: 30,
+										height: 30,
+										margin: 10,
+									}}
+								/>
 							</Pressable>
-						);
-					})}
-				</View>
+						))}
+					</View>
+				</LinearGradient>
 			</ScrollView>
-			<View style={styles.addVideo}>
-				<AddVideoBtn label="Add video" onPress={chooseImages} />
-			</View>
-			<View style={styles.timeline}></View>
 		</>
 	);
 }
@@ -164,7 +240,7 @@ export default function TabTwoScreen() {
 const styles = StyleSheet.create({
 	preview: {
 		width: '100%',
-		height: 170,
+		height: 190,
 		backgroundColor: 'pink',
 	},
 	previewVideo: {
@@ -173,9 +249,6 @@ const styles = StyleSheet.create({
 	},
 	collection: {
 		flexDirection: 'row',
-		margin: 10,
-		// width: '90%',
-		// height: 100,
 	},
 	addVideo: {
 		width: '100%',
@@ -184,10 +257,23 @@ const styles = StyleSheet.create({
 		justifyContent: 'flex-end',
 	},
 	scrollClips: {
-		height: 150,
+		height: 100,
 	},
 	timeline: {
 		width: '100%',
 		height: 150,
+		paddingTop: 50,
+		paddingBottom: 50,
+		// backgroundColor: 'red',
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	iconContainer: {
+		width: '100%',
+		flexDirection: 'row',
+		justifyContent: 'space-around',
+		alignItems: 'center',
+		marginBottom: 10,
 	},
 });
