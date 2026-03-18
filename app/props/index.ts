@@ -9,6 +9,12 @@ export type HeaderProps = {
 	onMenuPress: () => void;
 };
 
+export type ViewProps = {
+	icon: ImageSourcePropType;
+
+	onMenuPress: () => void;
+};
+
 /* hamburger menu items*/
 export type MenuItem = {
 	label: string;

@@ -68,7 +68,7 @@ export default function HomeScreen() {
 						style={styles.videoCard}
 						onPress={() =>
 							router.navigate(
-								`projects?projectId=${mockupProject.id}`, // Projects.tsx (2. tab) can read the projectId & know which project to load
+								`/tabs/projects?projectId=${mockupProject.id}`, // Projects.tsx (2. tab) can read the projectId & know which project to load
 							)
 						}>
 						<Image
@@ -81,7 +81,7 @@ export default function HomeScreen() {
 
 				{/* 'CREATE NEW PROJECT BUTTON ON THE BOTTOM */}
 				<Pressable
-					onPress={() => router.navigate('projects')}
+					onPress={() => router.navigate('/tabs/projects')}
 					style={styles.button}>
 					<LinearGradient
 						colors={['#ffc26d', '#fc8ed2']}
