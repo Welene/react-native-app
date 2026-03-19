@@ -1,5 +1,4 @@
 // SECOND TAB SECTION
-
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useVideoPlayer, VideoView } from 'expo-video';
@@ -19,20 +18,34 @@ import iconDuration from '../assets/icons/duration.png';
 import iconExport from '../assets/icons/export.png';
 import iconMusic from '../assets/icons/music.png';
 import iconMute from '../assets/icons/mute.png';
+import playBtn from '../assets/icons/play.png';
 import logo from '../assets/logo/min5.png';
 import AddVideoBtn from '../components/AddVideoBtn';
 import Header from '../components/Header';
 import { Clip } from '../props';
 
+// --------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------- THE-WHOLE-ASS-SCREEN SECTION -------------------------------------------------------
 export default function TabTwoScreen() {
-	const [clips, setClips] = useState<Clip[]>([]); // uses the prop Clip - ts knows clips is an [] of Clip objects
+	// state of all clips, uses the Clip prop
+	const [clips, setClips] = useState<Clip[]>([]);
+
+	//state keeps track of: currently clicked mini clip, last added mini clip & if timeline clips are being played right now or not
 	const [currentlyClicked, setCurrentlyClicked] = useState<Clip | null>(null); // remembers which clip is clicked so it shows up in previewVideo - overrides latestClip
 	const [timelineClips, setTimelineClips] = useState<Clip[]>([]); // clips that are added to the timeline - starts as empty [] and gets filled with clips that are added to timeline
+	const [isPlayingTimeline, setIsPlayingTimeline] = useState(false); // tells preview vid container the timeline vid  needs to show now (not currentlyCLicked mini-clip or latestClip) -- further down!!
+	const [currentTimelineIndex, setCurrentTimelineIndex] = useState(0); // knows which clip is being played currently, starts with clip nr.1 (0)
 
-	const clipToPreview = currentlyClicked ?? clips[clips.length - 1] ?? null;
+	// variable decided preview clip: if timeline is playing --> shows timeline vid, if not --> shows currently clicked mini clip, if no currently clicked clip --> shows latest added clip
+	const clipToPreview = isPlayingTimeline
+		? (timelineClips[currentTimelineIndex] ?? null)
+		: (currentlyClicked ?? clips[clips.length - 1] ?? null);
+
+	// using useVideoPlayer to play videos - clipToPreview ^ decides from where/which one
 	const previewPlayer = useVideoPlayer(clipToPreview?.uri ?? '');
 
 	const chooseImages = async () => {
+		// FUNCTION FOR CHOOSING VIDS FROM PHONE GALLERY - & also clicking on the chosen vids to preview (play) them above
 		let result = await ImagePicker.launchImageLibraryAsync({
 			// opens phone gallery where you  can choose img/vid
 			mediaTypes: 'videos',
@@ -97,8 +110,34 @@ export default function TabTwoScreen() {
 	];
 
 	// --------------------------------------------------------------------------------------------------------------------------------
-	// ------------------------------------------- RENDER STUFF ON PAGE SECTION -------------------------------------------------------
+	// ------------------------------------------- PLAY TIMELINE CLIPS AS IF IT WAS 1 VIDEO -------------------------------------------
+	// function to play the clips in the timeline
 
+	useEffect(() => {
+		if (!previewPlayer || !isPlayingTimeline) return; // returns if no useVideoPlayer exists  OR  if timeline is not playing
+
+		const playToEndListener = previewPlayer.addListener('playToEnd', () => {
+			setCurrentTimelineIndex((prev) => {
+				if (prev < timelineClips.length - 1) {
+					// checks if there are more clips in the [] to play - if not - ends the playback of clips
+					return prev + 1; // more clips --> keeps playing clips
+				} else {
+					setIsPlayingTimeline(false); // no more clips --> stops the timeline playback (switches back to currently clicked mini clip or latest clip in preview)
+					return prev; // stay on last clip
+				}
+			});
+		});
+		return () => playToEndListener.remove(); // removes the listener so it does not make any more players when the component is unmounted
+	}, [timelineClips, previewPlayer, isPlayingTimeline]);
+
+	// autoplay whenever new clip is starting in timeline (otherwise you need to manually press play btn every time for each new clip...)
+	useEffect(() => {
+		if (!previewPlayer || !isPlayingTimeline) return; // only autoplay when timeline is active
+		previewPlayer.play(); // automatically play whenever currentTimelineIndex changes
+	}, [currentTimelineIndex, previewPlayer, isPlayingTimeline]);
+
+	// --------------------------------------------------------------------------------------------------------------------------------
+	// ------------------------------------------- RENDER STUFF ON PAGE SECTION -------------------------------------------------------
 	return (
 		<>
 			<Header
@@ -186,6 +225,23 @@ export default function TabTwoScreen() {
 					colors={['#ffc26d', '#fc8ed2']}
 					start={{ x: 0, y: 0 }}
 					end={{ x: 1, y: 0 }}>
+					<Pressable
+						onPress={() => {
+							if (timelineClips.length === 0) return; // 0 clips in timeline --> btn does not start this play function
+
+							setCurrentTimelineIndex(0); // plays first timeline clip
+							setIsPlayingTimeline(true); // swaps out prev preview vid with timeline video
+						}}>
+						<Image
+							source={playBtn}
+							style={{
+								width: 30,
+								height: 30,
+								margin: 10,
+								alignSelf: 'center',
+							}}
+						/>
+					</Pressable>
 					<DraggableFlatList
 						data={timelineClips}
 						keyExtractor={(item) => item.id.toString()}
