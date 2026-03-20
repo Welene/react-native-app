@@ -5,7 +5,7 @@ import { addVideoBtn } from '../props';
 
 export function AddVideoBtn({ label, onPress }: addVideoBtn) {
 	return (
-		<Pressable style={styles.imgButton} onPress={onPress}>
+		<Pressable style={styles.addButton} onPress={onPress}>
 			<LinearGradient
 				colors={['#ffc26d', '#fc8ed2']}
 				start={{ x: 0, y: 0 }}
@@ -19,13 +19,13 @@ export function AddVideoBtn({ label, onPress }: addVideoBtn) {
 export default AddVideoBtn;
 
 const styles = StyleSheet.create({
-	imgButton: {
+	addButton: {
 		width: 48,
 		height: 48,
 		borderRadius: 8,
 		marginTop: 20,
 		marginBottom: 20,
-		marginRight: 20,
+		right: 20,
 		overflow: 'hidden',
 	},
 	buttonText: {
