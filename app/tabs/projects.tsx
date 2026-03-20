@@ -72,7 +72,7 @@ export default function TabTwoScreen() {
 		if (!result.canceled) {
 			const newClips: Clip[] = result.assets.map((asset) => ({
 				// Clip[] using the prop, but telling it to expect an array of clips
-				id: Date.now() + Math.random(), // id = time now in ms + (because several videos can be selected at the same ms) Math.random gives additional random number in the id
+				id: (Date.now() + Math.random()).toString(), // id = time now in ms + (because several videos can be selected at the same ms) Math.random gives additional random number in the id
 				uri: asset.uri,
 				duration: asset.duration || 0,
 				fileName: asset.fileName || 'unknown',
@@ -95,7 +95,7 @@ export default function TabTwoScreen() {
 	};
 
 	// helper for thumbnails in mini clips - MOVE THIS ONE OUT TO A HELPER FILE/FOLDER LATER FOR MORE CLEAN STRUCTURE - do not forget!
-	const [thumbnails, setThumbnails] = useState<{ [id: number]: string }>({});
+	const [thumbnails, setThumbnails] = useState<{ [id: string]: string }>({});
 
 	useEffect(() => {
 		clips.forEach(async (clip) => {
@@ -232,12 +232,7 @@ export default function TabTwoScreen() {
 											source={{
 												uri: thumbnails[clip.id],
 											}}
-											style={{
-												width: 80,
-												height: 80,
-												borderRadius: 8,
-												margin: 10,
-											}}
+											style={styles.thumbnail}
 										/>
 									) : (
 										<LinearGradient
@@ -245,8 +240,8 @@ export default function TabTwoScreen() {
 											start={{ x: 0, y: 0 }}
 											end={{ x: 1, y: 0 }}
 											style={{
-												width: 80,
-												height: 80,
+												width: 60,
+												height: 60,
 												borderRadius: 8,
 												margin: 10,
 											}}>
@@ -298,9 +293,7 @@ export default function TabTwoScreen() {
 					</Pressable>
 					<DraggableFlatList
 						data={timelineClips}
-						keyExtractor={(item, index) =>
-							item.id.toString() + '-' + index
-						}
+						keyExtractor={(item) => item.id.toString()}
 						horizontal
 						renderItem={({ item, drag, isActive }) => (
 							<View>
@@ -385,10 +378,9 @@ const styles = StyleSheet.create({
 	},
 	timeline: {
 		width: '100%',
-		height: 110,
-		paddingTop: 50,
-		paddingBottom: 50,
-		// backgroundColor: 'red',
+		height: 65,
+		paddingTop: 10,
+		paddingBottom: 10,
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -398,5 +390,11 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-around',
 		alignItems: 'center',
+	},
+	thumbnail: {
+		width: 60,
+		height: 60,
+		borderRadius: 8,
+		margin: 10,
 	},
 });
