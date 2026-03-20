@@ -36,13 +36,27 @@ export default function TabTwoScreen() {
 	const [isPlayingTimeline, setIsPlayingTimeline] = useState(false); // tells preview vid container the timeline vid  needs to show now (not currentlyCLicked mini-clip or latestClip) -- further down!!
 	const [currentTimelineIndex, setCurrentTimelineIndex] = useState(0); // knows which clip is being played currently, starts with clip nr.1 (0)
 
-	// variable decided preview clip: if timeline is playing --> shows timeline vid, if not --> shows currently clicked mini clip, if no currently clicked clip --> shows latest added clip
+	//yet ANOTHER state for keeping track of muted/not muted timeline
+	const [muted, setMuted] = useState(false);
+
+	// ANOTHER STATE for keeping track of if mini clip is clicked then it should play
+	const [playingMiniClip, setPlayingMiniClip] = useState<Clip | null>(null);
+
+	// decides vid in preview: if you click mini clip that one shows up, if timeline is playing the current timeline clip shows. Nothing clicked/timeline not playing = latest added clip shows up
 	const clipToPreview = isPlayingTimeline
-		? (timelineClips[currentTimelineIndex] ?? null)
+		? timelineClips[
+				Math.min(currentTimelineIndex, timelineClips.length - 1)
+			]
 		: (currentlyClicked ?? clips[clips.length - 1] ?? null);
 
 	// using useVideoPlayer to play videos - clipToPreview ^ decides from where/which one
 	const previewPlayer = useVideoPlayer(clipToPreview?.uri ?? '');
+
+	// mute btn for timeline vid
+	useEffect(() => {
+		if (!previewPlayer) return;
+		previewPlayer.volume = muted ? 0 : 1;
+	}, [previewPlayer, muted]);
 
 	const chooseImages = async () => {
 		// FUNCTION FOR CHOOSING VIDS FROM PHONE GALLERY - & also clicking on the chosen vids to preview (play) them above
@@ -123,7 +137,7 @@ export default function TabTwoScreen() {
 					return prev + 1; // more clips --> keeps playing clips
 				} else {
 					setIsPlayingTimeline(false); // no more clips --> stops the timeline playback (switches back to currently clicked mini clip or latest clip in preview)
-					return prev; // stay on last clip
+					return 0; // stay on last clip
 				}
 			});
 		});
@@ -132,8 +146,28 @@ export default function TabTwoScreen() {
 
 	// autoplay whenever new clip is starting in timeline (otherwise you need to manually press play btn every time for each new clip...)
 	useEffect(() => {
-		if (!previewPlayer || !isPlayingTimeline) return; // only autoplay when timeline is active
-		previewPlayer.play(); // automatically play whenever currentTimelineIndex changes
+		if (!previewPlayer) return;
+
+		if (!isPlayingTimeline) {
+			// only autoplay when timeline is active
+			previewPlayer.pause();
+			return; // automatically play whenever currentTimelineIndex changes
+		}
+
+		previewPlayer.play();
+
+		const secondTimer = setTimeout(() => {
+			setCurrentTimelineIndex((prev) => {
+				if (prev < timelineClips.length - 1) {
+					return prev + 1;
+				} else {
+					return 0;
+				}
+			});
+		}, clipToPreview?.segmentLength * 1000); // prevents lag between clips
+		return () => {
+			clearTimeout(secondTimer);
+		}; // clears the timer so it does not make any more timers when the component is unmounted
 	}, [currentTimelineIndex, previewPlayer, isPlayingTimeline]);
 
 	// --------------------------------------------------------------------------------------------------------------------------------
@@ -154,6 +188,8 @@ export default function TabTwoScreen() {
 							<VideoView
 								player={previewPlayer}
 								style={styles.previewVideo}
+								nativeControls={false}
+								allowsFullscreen={false}
 							/>
 						) : (
 							<Text>Select a video to preview</Text>
@@ -169,15 +205,27 @@ export default function TabTwoScreen() {
 								<Pressable
 									key={clip.id}
 									onPress={() => {
-										setCurrentlyClicked(clip); // shows in preview
-										setTimelineClips((prev) => [
-											...prev,
-											clip,
-										]); // adds to timeline
-										console.log(
-											'CLIP ADDED TO TIMELINE STATE NOW',
-											timelineClips,
-										);
+										if (isPlayingTimeline)
+											setIsPlayingTimeline(false);
+
+										setCurrentlyClicked(clip);
+
+										setPlayingMiniClip(clip);
+
+										setTimelineClips((prev) => {
+											if (
+												prev.find(
+													(c) => c.id === clip.id,
+												)
+											)
+												return prev;
+											return [...prev, clip];
+										});
+
+										if (previewPlayer) {
+											previewPlayer.pause(); // reset playback
+											previewPlayer.play();
+										}
 									}}>
 									{thumbnails[clip.id] ? (
 										<Image
@@ -227,10 +275,16 @@ export default function TabTwoScreen() {
 					end={{ x: 1, y: 0 }}>
 					<Pressable
 						onPress={() => {
-							if (timelineClips.length === 0) return; // 0 clips in timeline --> btn does not start this play function
+							if (timelineClips.length === 0) return;
 
-							setCurrentTimelineIndex(0); // plays first timeline clip
-							setIsPlayingTimeline(true); // swaps out prev preview vid with timeline video
+							if (!isPlayingTimeline) {
+								// if timeline is done playing clips, reset to index 0 so it can replay
+								setCurrentTimelineIndex((prev) =>
+									prev >= timelineClips.length ? 0 : prev,
+								);
+							}
+
+							setIsPlayingTimeline((prev) => !prev);
 						}}>
 						<Image
 							source={playBtn}
@@ -244,7 +298,9 @@ export default function TabTwoScreen() {
 					</Pressable>
 					<DraggableFlatList
 						data={timelineClips}
-						keyExtractor={(item) => item.id.toString()}
+						keyExtractor={(item, index) =>
+							item.id.toString() + '-' + index
+						}
 						horizontal
 						renderItem={({ item, drag, isActive }) => (
 							<View>
@@ -269,16 +325,23 @@ export default function TabTwoScreen() {
 					<View style={styles.iconContainer}>
 						{icons.map((icon, index) => (
 							<Pressable
-								key={index}
-								onPress={() =>
-									console.log(`${icon.name} pressed`)
-								}>
+								onPress={() => {
+									if (icon.name === 'Mute') {
+										setMuted((prev) => !prev); // toggle mute state
+									} else {
+										console.log(`${icon.name} pressed`);
+									}
+								}}>
 								<Image
 									source={icon.src}
 									style={{
 										width: 30,
 										height: 30,
 										margin: 10,
+										opacity:
+											icon.name === 'Mute' && muted
+												? 0.5
+												: 1,
 									}}
 								/>
 							</Pressable>
@@ -312,12 +375,17 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
 	},
+	addVideoBtn: {
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
 	scrollClips: {
-		height: 100,
+		height: 90,
 	},
 	timeline: {
 		width: '100%',
-		height: 150,
+		height: 110,
 		paddingTop: 50,
 		paddingBottom: 50,
 		// backgroundColor: 'red',
@@ -330,6 +398,5 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-around',
 		alignItems: 'center',
-		marginBottom: 10,
 	},
 });
