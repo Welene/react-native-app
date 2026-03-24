@@ -34,7 +34,8 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 	},
 	gradient: {
-		padding: 6,
+		flex: 1,
+		justifyContent: 'center',
 		alignItems: 'center',
 	},
 });

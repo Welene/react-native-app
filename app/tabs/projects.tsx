@@ -1,4 +1,4 @@
-// SECOND TAB SECTION
+// SECOND TAB SECTION <-- more like an edit page, but it has the name projects now kkkkk
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useVideoPlayer, VideoView } from 'expo-video';
@@ -18,6 +18,7 @@ import iconDuration from '../assets/icons/duration.png';
 import iconExport from '../assets/icons/export.png';
 import iconMusic from '../assets/icons/music.png';
 import iconMute from '../assets/icons/mute.png';
+import pause from '../assets/icons/pause.png';
 import playBtn from '../assets/icons/play.png';
 import logo from '../assets/logo/min5.png';
 import AddVideoBtn from '../components/AddVideoBtn';
@@ -181,6 +182,7 @@ export default function TabTwoScreen() {
 			<ScrollView>
 				<View style={styles.preview}>
 					<LinearGradient
+						style={styles.previewGradient}
 						colors={['#ffc26d', '#fc8ed2']}
 						start={{ x: 0, y: 0 }}
 						end={{ x: 1, y: 0 }}>
@@ -189,10 +191,11 @@ export default function TabTwoScreen() {
 								player={previewPlayer}
 								style={styles.previewVideo}
 								nativeControls={false}
-								allowsFullscreen={false}
 							/>
 						) : (
-							<Text>Select a video to preview</Text>
+							<Text style={styles.previewText}>
+								Add a video to preview down below! (+)
+							</Text>
 						)}
 					</LinearGradient>
 				</View>
@@ -265,6 +268,7 @@ export default function TabTwoScreen() {
 
 				{/* TIMELINE SECTION - CLIPS ADDED FROM THE MINI CLIP COLLECTION */}
 				<LinearGradient
+					style={styles.timelineGradient}
 					colors={['#ffc26d', '#fc8ed2']}
 					start={{ x: 0, y: 0 }}
 					end={{ x: 1, y: 0 }}>
@@ -282,42 +286,41 @@ export default function TabTwoScreen() {
 							setIsPlayingTimeline((prev) => !prev);
 						}}>
 						<Image
-							source={playBtn}
-							style={{
-								width: 30,
-								height: 30,
-								margin: 10,
-								alignSelf: 'center',
-							}}
+							source={isPlayingTimeline ? pause : playBtn}
+							style={styles.togglePlayBtn}
 						/>
 					</Pressable>
-					<DraggableFlatList
-						data={timelineClips}
-						keyExtractor={(item) => item.id.toString()}
-						horizontal
-						renderItem={({ item, drag, isActive }) => (
-							<View>
-								<Pressable
-									onLongPress={drag}
-									style={styles.timeline}>
-									<Image
-										source={{ uri: thumbnails[item.id] }}
-										style={{
-											width: 100,
-											height: 100,
-											opacity: isActive ? 0.7 : 1,
-										}}
-									/>
-								</Pressable>
-							</View>
-						)}
-						onDragEnd={({ data }) => setTimelineClips(data)}
-					/>
-
+					<View style={styles.clipsWrapper}>
+						<DraggableFlatList
+							data={timelineClips}
+							keyExtractor={(item) => item.id.toString()}
+							horizontal
+							renderItem={({ item, drag, isActive }) => (
+								<View>
+									<Pressable
+										onLongPress={drag}
+										style={styles.timelineClips}>
+										<Image
+											source={{
+												uri: thumbnails[item.id],
+											}}
+											style={{
+												width: 100,
+												height: 100,
+												opacity: isActive ? 0.7 : 1,
+											}}
+										/>
+									</Pressable>
+								</View>
+							)}
+							onDragEnd={({ data }) => setTimelineClips(data)}
+						/>
+					</View>
 					{/* ICON SECTION */}
 					<View style={styles.iconContainer}>
 						{icons.map((icon, index) => (
 							<Pressable
+								key={icon.name}
 								onPress={() => {
 									if (icon.name === 'Mute') {
 										setMuted((prev) => !prev); // toggle mute state
@@ -359,6 +362,16 @@ const styles = StyleSheet.create({
 		width: '100%',
 		height: '100%',
 	},
+	previewGradient: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		borderRadius: 8,
+	},
+	previewText: {
+		color: 'white',
+		fontSize: 15,
+	},
 	collection: {
 		flexDirection: 'row',
 	},
@@ -376,9 +389,24 @@ const styles = StyleSheet.create({
 	scrollClips: {
 		height: 90,
 	},
-	timeline: {
+	togglePlayBtn: {
+		width: 30,
+		height: 30,
+		margin: 10,
+		alignSelf: 'center',
+	},
+	timelineGradient: {
+		height: 180,
 		width: '100%',
-		height: 65,
+		flexDirection: 'column',
+		justifyContent: 'space-between',
+		alignItems: 'flex-start',
+	},
+	clipsWrapper: {
+		height: 75,
+	},
+	timelineClips: {
+		width: '100%',
 		paddingTop: 10,
 		paddingBottom: 10,
 		display: 'flex',
