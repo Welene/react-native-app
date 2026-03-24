@@ -30,11 +30,12 @@ const styles = StyleSheet.create({
 	},
 	buttonText: {
 		color: 'white',
-		fontSize: 28,
+		fontSize: 30,
 		fontWeight: 'bold',
 	},
 	gradient: {
-		padding: 6,
+		flex: 1,
+		justifyContent: 'center',
 		alignItems: 'center',
 	},
 });

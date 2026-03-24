@@ -27,7 +27,7 @@ export type addVideoBtn = {
 };
 
 export type Clip = {
-	id: number;
+	id: string;
 	uri: string;
 	duration?: number;
 	fileName?: string;
