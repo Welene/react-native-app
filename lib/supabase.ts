@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
 import 'expo-sqlite/localStorage/install';
-import 'react-native-dotenv';
+// import 'react-native-dotenv';
 import 'react-native-url-polyfill/auto';
 
 const projectURL = Constants.expoConfig?.extra?.supabaseUrl;
