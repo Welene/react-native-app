@@ -5,18 +5,35 @@ import { supabase } from '../lib/supabase';
 import RegisterLoginPage from './modal';
 
 export default function RootLayout() {
-	const [session, setSession] = useState<any>(null); // usestate for session change
+	const [session, setSession] = useState<any>(null);
 
 	useEffect(() => {
-		supabase.auth.getSession().then(({ data }) => setSession(data.session)); // checks if a session is already active AKA if someone registered is using the app
+		const checkSession = async () => {
+			const { data } = await supabase.auth.getSession();
+			const session = data.session;
+
+			if (!session) return setSession(null);
+
+			const { data: userData, error } = await supabase.auth.getUser();
+
+			if (error || !userData.user) {
+				await supabase.auth.signOut();
+				setSession(null);
+			} else {
+				setSession(session);
+			}
+		};
+
+		checkSession();
 
 		const { data: listener } = supabase.auth.onAuthStateChange(
-			(_event, session) => setSession(session), // updates session when auth state changes in supabase // changes on login/logout
+			(_event, session) => setSession(session),
 		);
+
 		return () => listener.subscription.unsubscribe();
 	}, []);
 
-	if (!session) return <RegisterLoginPage />; // show modal if not logged in (no active session exists)
+	if (!session) return <RegisterLoginPage />;
 
 	return (
 		<>

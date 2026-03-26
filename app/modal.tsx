@@ -34,7 +34,7 @@ export default function RegisterLoginPage() {
 			password,
 		});
 		if (error) alert(error.message);
-		else if (data.session) router.navigate('/tabs/index'); // navs to first page when logging in
+		else if (data.session) router.replace('/tabs'); // navs to first page when logging in
 	};
 
 	// --------------------------------------------------------------------------------------------------------------------------------
