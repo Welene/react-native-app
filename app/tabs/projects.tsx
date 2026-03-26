@@ -11,6 +11,7 @@ import {
 	ScrollView,
 	StyleSheet,
 	Text,
+	TextInput,
 	View,
 } from 'react-native'; // in Native you have to import all elements you use
 import DraggableFlatList from 'react-native-draggable-flatlist';
@@ -179,7 +180,16 @@ export default function TabTwoScreen() {
 				logo={logo}
 				onMenuPress={() => console.log('menu is pressed')}
 			/>
+
 			<ScrollView>
+				<Text style={styles.heading}>PROJECT NAME</Text>
+				<LinearGradient
+					colors={['#ffc26d', '#fc8ed2']}
+					start={{ x: 0, y: 0 }}
+					end={{ x: 1, y: 0 }}
+					style={styles.inputGradient}>
+					<TextInput style={styles.input} />
+				</LinearGradient>
 				<View style={styles.preview}>
 					<LinearGradient
 						style={styles.previewGradient}
@@ -210,11 +220,8 @@ export default function TabTwoScreen() {
 									onPress={() => {
 										if (isPlayingTimeline)
 											setIsPlayingTimeline(false);
-
 										setCurrentlyClicked(clip);
-
 										setPlayingMiniClip(clip);
-
 										setTimelineClips((prev) => {
 											if (
 												prev.find(
@@ -353,6 +360,22 @@ export default function TabTwoScreen() {
 // ------------------------------------------- STYLES SECTION ---------------------------------------------------------------------
 
 const styles = StyleSheet.create({
+	heading: {
+		fontSize: 20,
+
+		textAlign: 'center',
+	},
+	input: {
+		borderWidth: 2,
+		borderColor: '#c91f1f',
+		borderRadius: 8,
+		// padding: 12,
+		// marginBottom: 12,
+		fontSize: 16,
+	},
+	inputGradient: {
+		marginBottom: 50,
+	},
 	preview: {
 		width: '100%',
 		height: 190,
