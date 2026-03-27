@@ -35,6 +35,15 @@ export type Clip = {
 	segmentLength: number;
 };
 
+export type Project = {
+	id: string;
+	title: string;
+	timelineClips: Clip[];
+	clips: Clip[];
+	createdAt: string;
+	userId: string;
+};
+
 // export type HomepageProps = {
 // 	nature: ImageSourcePropType;
 // };

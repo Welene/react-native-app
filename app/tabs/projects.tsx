@@ -1,10 +1,14 @@
 // SECOND TAB SECTION <-- more like an edit page, but it has the name projects now kkkkk
+import { loadProject, saveProject } from '@/lib/projects';
+import { supabase } from '@/lib/supabase';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSearchParams } from 'expo-router/build/hooks';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useEffect, useState } from 'react';
 import {
+	Alert,
 	Image,
 	ImageSourcePropType,
 	Pressable,
@@ -28,9 +32,18 @@ import { Clip } from '../props';
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------- THE-WHOLE-ASS-SCREEN SECTION -------------------------------------------------------
+//
+//
+//
+//
+//
+
 export default function TabTwoScreen() {
 	// state of all clips, uses the Clip prop
 	const [clips, setClips] = useState<Clip[]>([]);
+
+	// state for title input - so title can be saved in Projects (which is a state in lib/projects.ts that will show all projects on home page)
+	const [title, setTitle] = useState('');
 
 	//state keeps track of: currently clicked mini clip, last added mini clip & if timeline clips are being played right now or not
 	const [currentlyClicked, setCurrentlyClicked] = useState<Clip | null>(null); // remembers which clip is clicked so it shows up in previewVideo - overrides latestClip
@@ -125,9 +138,65 @@ export default function TabTwoScreen() {
 		{ src: iconDuration, name: 'Duration' },
 	];
 
+	// saving the project
+	const handleSave = async () => {
+		const {
+			data: { user },
+		} = await supabase.auth.getUser();
+		const currentUser = user!;
+
+		await saveProject({
+			id: Date.now().toString(),
+			title,
+			clips,
+			timelineClips,
+			createdAt: new Date().toISOString(),
+			userId: currentUser.id,
+		});
+		Alert.alert('Saved!', 'Your project has been saved successfully.');
+	};
+
+	// reset the page if the "create new project" btn is pressed on homepage
+	const params = useSearchParams();
+	const projectId = params.get('projectId'); // for loading a project
+	const newProjectFlag = params.get('newProject') === 'true'; // for starting fresh
+
+	// then, only set previous project if NOT new
+	useEffect(() => {
+		if (newProjectFlag) {
+			// only reset if starting new project (btn)
+			setClips([]);
+			setTimelineClips([]);
+			setTitle('');
+			setCurrentlyClicked(null);
+			setCurrentTimelineIndex(0);
+			setIsPlayingTimeline(false);
+			setMuted(false);
+			setPlayingMiniClip(null);
+		} else if (projectId) {
+			// load existing project instead pf empty edit page
+			(async () => {
+				const project = await loadProject(projectId);
+				if (project) {
+					setTitle(project.title);
+					setClips(project.clips);
+					setTimelineClips(project.timelineClips ?? []);
+					setCurrentlyClicked(
+						project.clips[project.clips.length - 1] ?? null,
+					);
+				}
+			})();
+		}
+	}, [newProjectFlag, projectId]);
+
 	// --------------------------------------------------------------------------------------------------------------------------------
 	// ------------------------------------------- PLAY TIMELINE CLIPS AS IF IT WAS 1 VIDEO -------------------------------------------
 	// function to play the clips in the timeline
+	//
+	//
+	//
+	//
+	//
 
 	useEffect(() => {
 		if (!previewPlayer || !isPlayingTimeline) return; // returns if no useVideoPlayer exists  OR  if timeline is not playing
@@ -174,6 +243,11 @@ export default function TabTwoScreen() {
 
 	// --------------------------------------------------------------------------------------------------------------------------------
 	// ------------------------------------------- RENDER STUFF ON PAGE SECTION -------------------------------------------------------
+	//
+	//
+	//
+	//
+	//
 	return (
 		<>
 			<Header
@@ -188,8 +262,17 @@ export default function TabTwoScreen() {
 					start={{ x: 0, y: 0 }}
 					end={{ x: 1, y: 0 }}
 					style={styles.inputGradient}>
-					<TextInput style={styles.input} />
+					<TextInput
+						style={styles.input}
+						value={title}
+						onChangeText={setTitle}
+					/>
+					<Pressable style={styles.saveBtn} onPress={handleSave}>
+						<Text style={styles.saveTxt}>Save</Text>
+					</Pressable>
 				</LinearGradient>
+
+				{/* preview section */}
 				<View style={styles.preview}>
 					<LinearGradient
 						style={styles.previewGradient}
@@ -358,22 +441,51 @@ export default function TabTwoScreen() {
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------- STYLES SECTION ---------------------------------------------------------------------
+//
+//
+//
+//
+//
 
 const styles = StyleSheet.create({
 	heading: {
 		fontSize: 20,
-
+		marginTop: 20,
+		marginBottom: 20,
 		textAlign: 'center',
 	},
 	input: {
+		width: '90%',
 		borderWidth: 2,
-		borderColor: '#c91f1f',
+		// borderColor: '#c91f1f',
+		borderColor: 'white',
 		borderRadius: 8,
+		backgroundColor: 'white',
 		// padding: 12,
-		// marginBottom: 12,
+		marginBottom: 10,
 		fontSize: 16,
+		alignSelf: 'center',
+	},
+	saveBtn: {
+		backgroundColor: 'green',
+		paddingBottom: 10,
+		paddingTop: 10,
+		width: 55,
+		borderRadius: 8,
+		display: 'flex',
+		alignItems: 'center',
+		alignSelf: 'flex-end',
+		marginRight: 18,
+	},
+	saveTxt: {
+		color: 'white',
+		fontWeight: 'bold',
 	},
 	inputGradient: {
+		height: 130,
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'center',
 		marginBottom: 50,
 	},
 	preview: {

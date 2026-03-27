@@ -1,51 +1,45 @@
 // FIRST TAB SECTION
+import { loadProject } from '@/lib/projects';
+import { supabase } from '@/lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router'; // for onPress nav to a different tab
+import { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import logo from '../assets/logo/min5.png';
 import nature from '../assets/logo/MockupImg.png';
 import Header from '../components/Header';
+import { Project } from '../props';
 
 export default function HomeScreen() {
 	const router = useRouter();
+	const [projects, setProjects] = useState<Project[]>([]);
 
-	const mockupProjects = [
-		{
-			id: '1',
-			title: 'My First Video',
-			thumbnail: nature,
-		},
-		{
-			id: '2',
-			title: 'My Second Video',
-			thumbnail: nature,
-		},
-		{
-			id: '3',
-			title: 'My Third Video',
-			thumbnail: nature,
-		},
-		{
-			id: '4',
-			title: 'My Fourth Video',
-			thumbnail: nature,
-		},
-		{
-			id: '5',
-			title: 'My 5th Video',
-			thumbnail: nature,
-		},
-		{
-			id: '6',
-			title: 'My 6th Video',
-			thumbnail: nature,
-		},
-		{
-			id: '7',
-			title: 'My 7th Video',
-			thumbnail: nature,
-		},
-	];
+	// LOAD ALL SAVED PROJECTS BY USER
+	const loadAllProjects = async () => {
+		// get saved project IDs
+		const listJson = await AsyncStorage.getItem('projects-list');
+		const list: string[] = listJson ? JSON.parse(listJson) : [];
+		// load each project individually
+
+		const {
+			data: { user },
+		} = await supabase.auth.getUser();
+
+		// USER WILL EXIST when visiting home page vvv - ts will be happy :)
+		const currentUser = user!;
+
+		const loaded = await Promise.all(list.map((id) => loadProject(id)));
+		setProjects(
+			loaded.filter(
+				(p): p is Project => p !== null && p.userId === currentUser.id,
+			),
+		);
+	};
+
+	useEffect(() => {
+		loadAllProjects();
+	}, []);
 
 	// --------------------------------------------------------------------------------------------------------------------------------
 	// ------------------------------------------- RENDER STUFF ON PAGE SECTION -------------------------------------------------------
@@ -54,34 +48,39 @@ export default function HomeScreen() {
 		<>
 			<Header
 				logo={logo}
-				onMenuPress={() => console.log('menu is pressed')}
+				onMenuPress={() => console.log('menu pressed')}
 			/>
 
 			<ScrollView
 				style={styles.scroll}
 				contentContainerStyle={{ alignItems: 'center' }}>
-				{/* contentContainerStyle = styles all children inside scroll container */}
 				<Text style={styles.heading}> MY PROJECTS </Text>
-				{mockupProjects.map((mockupProject) => (
+
+				{projects.map((project) => (
 					<Pressable
-						key={mockupProject.id}
+						key={project.id}
 						style={styles.videoCard}
 						onPress={() =>
 							router.navigate(
-								`/tabs/projects?projectId=${mockupProject.id}`, // Projects.tsx (2. tab) can read the projectId & know which project to load
+								`/tabs/projects?projectId=${project.id}`,
 							)
 						}>
 						<Image
-							source={mockupProject.thumbnail}
+							source={
+								project.clips[0]?.uri
+									? { uri: project.clips[0].uri }
+									: nature
+							}
 							style={styles.image}
 						/>
-						<Text style={styles.text}> {mockupProject.title} </Text>
+						<Text style={styles.text}>{project.title}</Text>
 					</Pressable>
 				))}
 
-				{/* 'CREATE NEW PROJECT BUTTON ON THE BOTTOM */}
 				<Pressable
-					onPress={() => router.navigate('/tabs/projects')}
+					onPress={() =>
+						router.navigate('/tabs/projects?newProject=true')
+					}
 					style={styles.button}>
 					<LinearGradient
 						colors={['#ffc26d', '#fc8ed2']}
