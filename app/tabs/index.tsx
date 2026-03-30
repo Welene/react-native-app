@@ -2,9 +2,10 @@
 import { loadProject } from '@/lib/projects';
 import { supabase } from '@/lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router'; // for onPress nav to a different tab
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import logo from '../assets/logo/min5.png';
 import nature from '../assets/logo/MockupImg.png';
@@ -40,6 +41,13 @@ export default function HomeScreen() {
 	useEffect(() => {
 		loadAllProjects();
 	}, []);
+
+	useFocusEffect(
+		// auto updates homepage with projects (even after first time loading)
+		useCallback(() => {
+			loadAllProjects();
+		}, []),
+	);
 
 	// --------------------------------------------------------------------------------------------------------------------------------
 	// ------------------------------------------- RENDER STUFF ON PAGE SECTION -------------------------------------------------------

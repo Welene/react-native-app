@@ -10,7 +10,11 @@ const Header: React.FC<HeaderProps> = ({ logo, onMenuPress }) => {
 
 	return (
 		<View style={styles.header}>
-			<Image source={logo} style={styles.logo} />
+			<Pressable
+				onPress={() => router.navigate('/tabs')}
+				style={styles.logo}>
+				<Image source={logo} style={styles.logo} />
+			</Pressable>
 
 			{/* Hamburger menu */}
 			<Pressable onPress={onMenuPress} style={styles.hamburger}>
