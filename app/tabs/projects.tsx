@@ -1,4 +1,4 @@
-// SECOND TAB SECTION <-- more like an edit page, but it has the name projects now kkkkk
+// SECOND TAB SECTION <-- more like an edit page, but it has the name projects now :'--)
 import { loadProject, saveProject } from '@/lib/projects';
 import { supabase } from '@/lib/supabase';
 import * as ImagePicker from 'expo-image-picker';
@@ -17,7 +17,7 @@ import {
 	Text,
 	TextInput,
 	View,
-} from 'react-native'; // in Native you have to import all elements you use
+} from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import iconDuration from '../assets/icons/duration.png';
 import iconExport from '../assets/icons/export.png';
@@ -44,6 +44,9 @@ export default function TabTwoScreen() {
 
 	// state for title input - so title can be saved in Projects (which is a state in lib/projects.ts that will show all projects on home page)
 	const [title, setTitle] = useState('');
+	const [currentProjectId, setCurrentProjectId] = useState<string | null>(
+		null,
+	); // prevents creating new project every time save btn is clicked
 
 	//state keeps track of: currently clicked mini clip, last added mini clip & if timeline clips are being played right now or not
 	const [currentlyClicked, setCurrentlyClicked] = useState<Clip | null>(null); // remembers which clip is clicked so it shows up in previewVideo - overrides latestClip
@@ -109,7 +112,7 @@ export default function TabTwoScreen() {
 		}
 	};
 
-	// helper for thumbnails in mini clips - MOVE THIS ONE OUT TO A HELPER FILE/FOLDER LATER FOR MORE CLEAN STRUCTURE - do not forget!
+	// for thumbnails in mini clips
 	const [thumbnails, setThumbnails] = useState<{ [id: string]: string }>({});
 
 	useEffect(() => {
@@ -145,14 +148,17 @@ export default function TabTwoScreen() {
 		} = await supabase.auth.getUser();
 		const currentUser = user!;
 
+		const id = currentProjectId ?? Date.now().toString(); // save btn creates new id if this project(id) has not been saved before - if there is one it updates
+
 		await saveProject({
-			id: Date.now().toString(),
+			id,
 			title,
 			clips,
 			timelineClips,
 			createdAt: new Date().toISOString(),
 			userId: currentUser.id,
 		});
+		setCurrentProjectId(id); // update currentprojectid state
 		Alert.alert('Saved!', 'Your project has been saved successfully.');
 	};
 
@@ -467,7 +473,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 	},
 	saveBtn: {
-		backgroundColor: 'green',
+		backgroundColor: 'pink',
 		paddingBottom: 10,
 		paddingTop: 10,
 		width: 55,

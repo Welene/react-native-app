@@ -34,7 +34,7 @@ export default function TabLayout() {
 							headerShown: false /* hides default boring title header */,
 							tabBarIcon: ({ color, size }) => (
 								<Image
-									source={cut}
+									source={project}
 									style={{
 										width: size,
 										height: size,
@@ -52,7 +52,7 @@ export default function TabLayout() {
 							headerShown: false,
 							tabBarIcon: ({ color, size }) => (
 								<Image
-									source={project}
+									source={cut}
 									style={{
 										width: size,
 										height: size,
