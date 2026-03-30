@@ -3,7 +3,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { HeaderProps } from '../props';
+import { HeaderProps } from '../../lib/props';
 
 const Header: React.FC<HeaderProps> = ({ logo, onMenuPress }) => {
 	const router = useRouter();

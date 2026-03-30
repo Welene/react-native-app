@@ -25,6 +25,7 @@ import {
 	View,
 } from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
+import { Clip } from '../../lib/props';
 import iconDuration from '../assets/icons/duration.png';
 import iconExport from '../assets/icons/export.png';
 import iconMusic from '../assets/icons/music.png';
@@ -34,7 +35,6 @@ import playBtn from '../assets/icons/play.png';
 import logo from '../assets/logo/min5.png';
 import AddVideoBtn from '../components/AddVideoBtn';
 import Header from '../components/Header';
-import { Clip } from '../props';
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------- THE-WHOLE-ASS-SCREEN SECTION -------------------------------------------------------

@@ -5,7 +5,11 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { registerUser } from '../lib/auth/register';
 import { supabase } from '../lib/supabase';
 
-export default function RegisterLoginPage() {
+export default function RegisterLoginPage({
+	onLoginSuccess,
+}: {
+	onLoginSuccess?: () => void;
+}) {
 	const router = useRouter();
 	const [mode, setMode] = useState<'register' | 'login'>('register'); // state for changing between register or login section on modal page (default: register)
 	const [username, setUsername] = useState('');
@@ -34,7 +38,9 @@ export default function RegisterLoginPage() {
 			password,
 		});
 		if (error) alert(error.message);
-		else if (data.session) router.replace('/tabs'); // navs to first page when logging in
+		else if (data.session) {
+			if (onLoginSuccess) onLoginSuccess();
+		}
 	};
 
 	// --------------------------------------------------------------------------------------------------------------------------------

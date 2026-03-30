@@ -1,6 +1,6 @@
 // HELPERS - logic for handling adding new project to the user's project array
 
-import { Project } from '@/app/props';
+import { Project } from '@/lib/props';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // save project function that will save all data from tab 2 (AKA where you edit clips) - called on button press in projects.tsx (<pressable/>)
