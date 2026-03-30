@@ -1,12 +1,18 @@
-// SECOND TAB SECTION <-- more like an edit page, but it has the name projects now :'--)
+// WELCOME TO: Helene thought it was a good idea to put the whole edit page in one file & divide it up later!! (so stupid.. :'--) )
+// SECOND TAB SECTION <-- more like an edit page, but it has the name projects now.
+
+// in case you're wondering:
+// apparently expo-video is not able to play a smooth timeline clip without merging the video, which will break the delete & rearrange functions :---------)
+
 import { loadProject, saveProject } from '@/lib/projects';
 import { supabase } from '@/lib/supabase';
+import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSearchParams } from 'expo-router/build/hooks';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as VideoThumbnails from 'expo-video-thumbnails';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
 	Alert,
 	Image,
@@ -37,37 +43,47 @@ import { Clip } from '../props';
 //
 //
 //
+//
+//
 
 export default function TabTwoScreen() {
 	// state of all clips, uses the Clip prop
 	const [clips, setClips] = useState<Clip[]>([]);
 
-	// state for title input - so title can be saved in Projects (which is a state in lib/projects.ts that will show all projects on home page)
+	// state for title input - title saved in Projects (which is a state in projects.ts (shows projects --> home page)
 	const [title, setTitle] = useState('');
+
+	// prevents creating new projectId every time save btn is clicked
 	const [currentProjectId, setCurrentProjectId] = useState<string | null>(
 		null,
-	); // prevents creating new project every time save btn is clicked
+	);
 
 	//state keeps track of: currently clicked mini clip, last added mini clip & if timeline clips are being played right now or not
-	const [currentlyClicked, setCurrentlyClicked] = useState<Clip | null>(null); // remembers which clip is clicked so it shows up in previewVideo - overrides latestClip
-	const [timelineClips, setTimelineClips] = useState<Clip[]>([]); // clips that are added to the timeline - starts as empty [] and gets filled with clips that are added to timeline
-	const [isPlayingTimeline, setIsPlayingTimeline] = useState(false); // tells preview vid container the timeline vid  needs to show now (not currentlyCLicked mini-clip or latestClip) -- further down!!
+	const [currentlyClicked, setCurrentlyClicked] = useState<Clip | null>(null); // remembers clicked clip --> shows up in previewVideo (overrides latestClip added!!)
+	const [timelineClips, setTimelineClips] = useState<Clip[]>([]); // clips added to timeline array --> starts [empty]
+	const [isPlayingTimeline, setIsPlayingTimeline] = useState(false); // tells preview vid container the timeline vid needs to show now (AKA NOT currentlyCLicked mini-clip / latestClip) -- further down!!
 	const [currentTimelineIndex, setCurrentTimelineIndex] = useState(0); // knows which clip is being played currently, starts with clip nr.1 (0)
 
-	//yet ANOTHER state for keeping track of muted/not muted timeline
+	// avoid video stretching bug --> tracks if  clip is horizontal/vertical
+	const [isVertical, setIsVertical] = useState<boolean | null>(null);
+
+	// state for keeping track of muted/not muted timeline
 	const [muted, setMuted] = useState(false);
 
 	// ANOTHER STATE for keeping track of if mini clip is clicked then it should play
 	const [playingMiniClip, setPlayingMiniClip] = useState<Clip | null>(null);
 
-	// decides vid in preview: if you click mini clip that one shows up, if timeline is playing the current timeline clip shows. Nothing clicked/timeline not playing = latest added clip shows up
+	// decides vid in preview:
+	// click mini clip --> that one shows up..
+	// if timeline is playing then the current timeline clip shows instead..
+	// nothing clicked or timeline not playing --> latest added clip shows up
 	const clipToPreview = isPlayingTimeline
 		? timelineClips[
 				Math.min(currentTimelineIndex, timelineClips.length - 1)
 			]
 		: (currentlyClicked ?? clips[clips.length - 1] ?? null);
 
-	// using useVideoPlayer to play videos - clipToPreview ^ decides from where/which one
+	// using useVideoPlayer to play videos - clipToPreview ^ decides from where/which vid
 	const previewPlayer = useVideoPlayer(clipToPreview?.uri ?? '');
 
 	// mute btn for timeline vid
@@ -76,8 +92,22 @@ export default function TabTwoScreen() {
 		previewPlayer.volume = muted ? 0 : 1;
 	}, [previewPlayer, muted]);
 
+	// pauses video when changing tab
+	useFocusEffect(
+		useCallback(() => {
+			return () => {
+				try {
+					previewPlayer?.pause();
+				} catch (error) {
+					console.log('skipping pause');
+				}
+			};
+		}, [previewPlayer]),
+	);
+
+	// CHOOSE VIDEOS FROM PHONE GALLERY SECTION
 	const chooseImages = async () => {
-		// FUNCTION FOR CHOOSING VIDS FROM PHONE GALLERY - & also clicking on the chosen vids to preview (play) them above
+		// also clicking on the chosen vids to preview (play) them above
 		let result = await ImagePicker.launchImageLibraryAsync({
 			// opens phone gallery where you  can choose img/vid
 			mediaTypes: 'videos',
@@ -86,11 +116,11 @@ export default function TabTwoScreen() {
 			quality: 1,
 		});
 
-		// video assets/metadata --> clip objects
+		// video assets/metadata (clip objects)
 		if (!result.canceled) {
 			const newClips: Clip[] = result.assets.map((asset) => ({
-				// Clip[] using the prop, but telling it to expect an array of clips
-				id: (Date.now() + Math.random()).toString(), // id = time now in ms + (because several videos can be selected at the same ms) Math.random gives additional random number in the id
+				// telling prop to expect array of clips []
+				id: (Date.now() + Math.random()).toString(), // id is time right now (but because several videos can be selected at the same time/ms --> Math.r gives extra id
 				uri: asset.uri,
 				duration: asset.duration || 0,
 				fileName: asset.fileName || 'unknown',
@@ -108,13 +138,14 @@ export default function TabTwoScreen() {
 				setCurrentlyClicked(newClips[newClips.length - 1]);
 			}
 		} else {
-			alert('Choose an image/video first');
+			alert('Choose a video first');
 		}
 	};
 
-	// for thumbnails in mini clips
+	// for thumbnails in mini clip collection (added from gallery / under preview)
 	const [thumbnails, setThumbnails] = useState<{ [id: string]: string }>({});
 
+	// gets thumbnail from clips added
 	useEffect(() => {
 		clips.forEach(async (clip) => {
 			if (!thumbnails[clip.id]) {
@@ -134,6 +165,7 @@ export default function TabTwoScreen() {
 		});
 	}, [clips]);
 
+	// IMPORT ICONS (MUTE, EXPORT, MUSIC, DURATION) FOR THE TIMELINE SECTION
 	const icons: { src: ImageSourcePropType; name: string }[] = [
 		{ src: iconMute, name: 'Mute' },
 		{ src: iconExport, name: 'Export' },
@@ -156,18 +188,18 @@ export default function TabTwoScreen() {
 			clips,
 			timelineClips,
 			createdAt: new Date().toISOString(),
-			userId: currentUser.id,
+			userId: currentUser.id, // saves with current logged in user
 		});
-		setCurrentProjectId(id); // update currentprojectid state
+		setCurrentProjectId(id); // update currentprojectid state - prevents new id when save btn is clicked after 1st save (click)
 		Alert.alert('Saved!', 'Your project has been saved successfully.');
 	};
 
-	// reset the page if the "create new project" btn is pressed on homepage
+	//  "create new project +" --> reset edit page / new project
 	const params = useSearchParams();
-	const projectId = params.get('projectId'); // for loading a project
-	const newProjectFlag = params.get('newProject') === 'true'; // for starting fresh
+	const projectId = params.get('projectId'); // for loading existing project
+	const newProjectFlag = params.get('newProject') === 'true'; // for starting fresh (reset)
 
-	// then, only set previous project if NOT new
+	// then, only set previous project if NOT new project
 	useEffect(() => {
 		if (newProjectFlag) {
 			// only reset if starting new project (btn)
@@ -180,7 +212,7 @@ export default function TabTwoScreen() {
 			setMuted(false);
 			setPlayingMiniClip(null);
 		} else if (projectId) {
-			// load existing project instead pf empty edit page
+			// load existing project instead of empty edit page
 			(async () => {
 				const project = await loadProject(projectId);
 				if (project) {
@@ -203,30 +235,32 @@ export default function TabTwoScreen() {
 	//
 	//
 	//
+	//
+	//
 
 	useEffect(() => {
-		if (!previewPlayer || !isPlayingTimeline) return; // returns if no useVideoPlayer exists  OR  if timeline is not playing
+		if (!previewPlayer || !isPlayingTimeline) return; // stops if no useVideoPlayer exists / timeline is not playing
 
 		const playToEndListener = previewPlayer.addListener('playToEnd', () => {
 			setCurrentTimelineIndex((prev) => {
 				if (prev < timelineClips.length - 1) {
 					// checks if there are more clips in the [] to play - if not - ends the playback of clips
-					return prev + 1; // more clips --> keeps playing clips
+					return prev + 1; // if more clips --> keeps playing
 				} else {
-					setIsPlayingTimeline(false); // no more clips --> stops the timeline playback (switches back to currently clicked mini clip or latest clip in preview)
+					setIsPlayingTimeline(false); // no more clips --> stops the playback
 					return 0; // stay on last clip
 				}
 			});
 		});
-		return () => playToEndListener.remove(); // removes the listener so it does not make any more players when the component is unmounted
+		return () => playToEndListener.remove(); // stops listener when comp unmounts
 	}, [timelineClips, previewPlayer, isPlayingTimeline]);
 
-	// autoplay whenever new clip is starting in timeline (otherwise you need to manually press play btn every time for each new clip...)
+	// autoplay new clip in timeline (otherwise you need to manually press play btn for every clip)
 	useEffect(() => {
 		if (!previewPlayer) return;
 
 		if (!isPlayingTimeline) {
-			// only autoplay when timeline is active
+			// only autoplay when timeline is active (PLAY mode)
 			previewPlayer.pause();
 			return; // automatically play whenever currentTimelineIndex changes
 		}
@@ -241,11 +275,24 @@ export default function TabTwoScreen() {
 					return 0;
 				}
 			});
-		}, clipToPreview?.segmentLength * 1000); // prevents lag between clips
+		}, clipToPreview?.segmentLength * 1000); // prevents lag between clips... tried to anyway lol
 		return () => {
 			clearTimeout(secondTimer);
-		}; // clears the timer so it does not make any more timers when the component is unmounted
+		}; // clears the timer --> does not make more timers on unmount
 	}, [currentTimelineIndex, previewPlayer, isPlayingTimeline]);
+
+	// gets data from video, is the vid a horizontalor vertical - fixes video stretching bug
+	useEffect(() => {
+		if (!clipToPreview) return;
+
+		Image.getSize(
+			clipToPreview.uri,
+			(width, height) => {
+				setIsVertical(height > width);
+			},
+			() => setIsVertical(null),
+		);
+	}, [clipToPreview]);
 
 	// --------------------------------------------------------------------------------------------------------------------------------
 	// ------------------------------------------- RENDER STUFF ON PAGE SECTION -------------------------------------------------------
@@ -254,6 +301,9 @@ export default function TabTwoScreen() {
 	//
 	//
 	//
+	//
+	//
+
 	return (
 		<>
 			<Header
@@ -278,28 +328,29 @@ export default function TabTwoScreen() {
 					</Pressable>
 				</LinearGradient>
 
-				{/* preview section */}
-				<View style={styles.preview}>
-					<LinearGradient
-						style={styles.previewGradient}
-						colors={['#ffc26d', '#fc8ed2']}
-						start={{ x: 0, y: 0 }}
-						end={{ x: 1, y: 0 }}>
-						{clipToPreview ? (
-							<VideoView
-								player={previewPlayer}
-								style={styles.previewVideo}
-								nativeControls={false}
-							/>
-						) : (
-							<Text style={styles.previewText}>
-								Add a video to preview down below! (+)
-							</Text>
-						)}
-					</LinearGradient>
+				{/* PREVIEW SECTION -------------------------------------*/}
+				<View style={styles.previewWrapper}>
+					{clipToPreview && isVertical !== null ? (
+						<VideoView
+							key={clipToPreview?.uri}
+							player={previewPlayer}
+							style={[
+								styles.previewVideo,
+								isVertical
+									? styles.verticalVideo
+									: styles.horizontalVideo,
+							]}
+							nativeControls={false}
+						/>
+					) : (
+						<Text style={styles.previewText}>
+							Add a video to preview down below! (+)
+						</Text>
+					)}
+					<AddVideoBtn onPress={chooseImages} label="+" />
 				</View>
 
-				{/* MINI CLIP COLLECTION FROM GALLERY SECTION */}
+				{/* MINI CLIP COLLECTION FROM GALLERY SECTION -----------------------------*/}
 				<ScrollView style={styles.scrollClips} horizontal={true}>
 					<View style={styles.collection}>
 						{clips.map((clip) => {
@@ -344,7 +395,7 @@ export default function TabTwoScreen() {
 												borderRadius: 8,
 												margin: 10,
 											}}>
-											<View // placeholder mini thumbnail - shows before thumbnail loads
+											<View // placeholder thumbnail - shows before thumbnail loads
 												style={{
 													width: 100,
 													height: 100,
@@ -358,11 +409,8 @@ export default function TabTwoScreen() {
 						})}
 					</View>
 				</ScrollView>
-				<View style={styles.addVideo}>
-					<AddVideoBtn label="Add video" onPress={chooseImages} />
-				</View>
 
-				{/* TIMELINE SECTION - CLIPS ADDED FROM THE MINI CLIP COLLECTION */}
+				{/* TIMELINE SECTION - CLIPS ADDED FROM MINI CLIP COLLECTION -------------------------*/}
 				<LinearGradient
 					style={styles.timelineGradient}
 					colors={['#ffc26d', '#fc8ed2']}
@@ -373,7 +421,7 @@ export default function TabTwoScreen() {
 							if (timelineClips.length === 0) return;
 
 							if (!isPlayingTimeline) {
-								// if timeline is done playing clips, reset to index 0 so it can replay
+								// if timeline is done playing, reset to index 0 --> replays
 								setCurrentTimelineIndex((prev) =>
 									prev >= timelineClips.length ? 0 : prev,
 								);
@@ -382,10 +430,11 @@ export default function TabTwoScreen() {
 							setIsPlayingTimeline((prev) => !prev);
 						}}>
 						<Image
-							source={isPlayingTimeline ? pause : playBtn}
+							source={isPlayingTimeline ? pause : playBtn} // toggle play icons
 							style={styles.togglePlayBtn}
 						/>
 					</Pressable>
+
 					<View style={styles.clipsWrapper}>
 						<DraggableFlatList
 							data={timelineClips}
@@ -394,7 +443,10 @@ export default function TabTwoScreen() {
 							renderItem={({ item, drag, isActive }) => (
 								<View>
 									<Pressable
-										onLongPress={drag}
+										onLongPress={drag} // drag to rearrange clips
+										onPress={() =>
+											setCurrentlyClicked(item)
+										} // for deleting clips from timeline: if clip clicked + click trash icon = gone
 										style={styles.timelineClips}>
 										<Image
 											source={{
@@ -409,9 +461,10 @@ export default function TabTwoScreen() {
 									</Pressable>
 								</View>
 							)}
-							onDragEnd={({ data }) => setTimelineClips(data)}
+							onDragEnd={({ data }) => setTimelineClips(data)} // updates state with new clip order
 						/>
 					</View>
+
 					{/* ICON SECTION */}
 					<View style={styles.iconContainer}>
 						{icons.map((icon, index) => (
@@ -438,6 +491,28 @@ export default function TabTwoScreen() {
 								/>
 							</Pressable>
 						))}
+						<Pressable // using currentlyClicked to know which clip to delete!
+							onPress={() => {
+								if (!currentlyClicked) return; // nothing has been clicked
+								setTimelineClips((prev) =>
+									prev.filter(
+										(clip) =>
+											clip.id !== currentlyClicked.id,
+									),
+								);
+								// reset currentlyClicked if it was deleted
+								if (
+									timelineClips.find(
+										(c) => c.id === currentlyClicked.id,
+									)
+								)
+									setCurrentlyClicked(null);
+							}}>
+							<Image
+								source={require('../assets/icons/trash.png')}
+								style={{ width: 30, height: 30, margin: 10 }}
+							/>
+						</Pressable>
 					</View>
 				</LinearGradient>
 			</ScrollView>
@@ -452,83 +527,110 @@ export default function TabTwoScreen() {
 //
 //
 //
+//
+//
 
 const styles = StyleSheet.create({
 	heading: {
-		fontSize: 20,
-		marginTop: 20,
-		marginBottom: 20,
+		fontSize: 25,
+		marginTop: 30,
+		marginBottom: 35,
 		textAlign: 'center',
+		fontFamily: 'LibreBaskerville_400Regular',
+		letterSpacing: 1.2,
 	},
 	input: {
-		width: '90%',
 		borderWidth: 2,
-		// borderColor: '#c91f1f',
 		borderColor: 'white',
-		borderRadius: 8,
-		backgroundColor: 'white',
-		// padding: 12,
-		marginBottom: 10,
+		borderTopLeftRadius: 8,
+		borderBottomLeftRadius: 8,
+		borderTopRightRadius: 0,
+		borderBottomRightRadius: 0,
+		backgroundColor: '#fcfcfc',
 		fontSize: 16,
-		alignSelf: 'center',
+		left: 15,
+		marginRight: 10,
+		flex: 1,
+		// iOS - I can't see :--)
+		shadowColor: '#000000',
+		shadowOffset: { width: 0, height: 3 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		// Android - I can see!
+		elevation: 10,
 	},
 	saveBtn: {
 		backgroundColor: 'pink',
-		paddingBottom: 10,
-		paddingTop: 10,
+		paddingBottom: 14,
+		paddingTop: 14,
 		width: 55,
 		borderRadius: 8,
 		display: 'flex',
 		alignItems: 'center',
-		alignSelf: 'flex-end',
-		marginRight: 18,
+		marginRight: 15,
+		borderTopLeftRadius: 0,
+		borderBottomLeftRadius: 0,
+		borderTopRightRadius: 8,
+		borderBottomRightRadius: 8,
+		shadowColor: '#000000',
+		shadowOffset: { width: 0, height: 3 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 10,
 	},
 	saveTxt: {
 		color: 'white',
 		fontWeight: 'bold',
 	},
 	inputGradient: {
-		height: 130,
+		height: 90,
 		display: 'flex',
-		flexDirection: 'column',
-		justifyContent: 'center',
-		marginBottom: 50,
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		shadowColor: '#000000',
+		shadowOffset: { width: 0, height: 3 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 10,
 	},
-	preview: {
+
+	previewWrapper: {
 		width: '100%',
 		height: 190,
-		backgroundColor: 'pink',
+		backgroundColor: '#f1f1f1',
+		position: 'relative',
+		overflow: 'hidden',
+		justifyContent: 'center',
+		alignItems: 'center',
 	},
 	previewVideo: {
+		position: 'absolute',
+	},
+
+	horizontalVideo: {
 		width: '100%',
 		height: '100%',
 	},
-	previewGradient: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderRadius: 8,
+
+	verticalVideo: {
+		height: '100%',
+		width: undefined,
+		aspectRatio: 9 / 16,
 	},
 	previewText: {
-		color: 'white',
+		color: 'grey',
+		fontStyle: 'italic',
+		letterSpacing: 1.2,
 		fontSize: 15,
 	},
 	collection: {
 		flexDirection: 'row',
 	},
-	addVideo: {
-		width: '100%',
-		display: 'flex',
-		flexDirection: 'row',
-		justifyContent: 'flex-end',
-	},
-	addVideoBtn: {
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
+
 	scrollClips: {
 		height: 90,
+		marginBottom: 30,
 	},
 	togglePlayBtn: {
 		width: 30,
@@ -565,5 +667,15 @@ const styles = StyleSheet.create({
 		height: 60,
 		borderRadius: 8,
 		margin: 10,
+	},
+	shadowBox: {
+		// to put on dynamic elements
+		// iOS
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 3 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		// Android
+		elevation: 10,
 	},
 });

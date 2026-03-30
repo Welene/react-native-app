@@ -1,3 +1,7 @@
+import {
+	LibreBaskerville_400Regular,
+	useFonts,
+} from '@expo-google-fonts/libre-baskerville';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -6,6 +10,10 @@ import RegisterLoginPage from './modal';
 
 export default function RootLayout() {
 	const [session, setSession] = useState<any>(null);
+
+	const [fontsLoaded] = useFonts({
+		LibreBaskerville_400Regular,
+	});
 
 	useEffect(() => {
 		const checkSession = async () => {
@@ -33,6 +41,7 @@ export default function RootLayout() {
 		return () => listener.subscription.unsubscribe();
 	}, []);
 
+	if (!fontsLoaded) return null;
 	if (!session) return <RegisterLoginPage />;
 
 	return (
