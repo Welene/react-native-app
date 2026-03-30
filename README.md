@@ -1,5 +1,28 @@
 # HOW TO GET APP
 
 1) GET AN ANDROID.
-2) DOWNLOAD APP APK FROM: https://we.tl/t-AgBqsOydWw7QWnjg
-3) (hold on let me just download myself and see what on Earth to do... :--) )
+
+2) GO TO THIS PAGE: 
+https://expo.dev/accounts/welene/projects/my-millionth-native-app/builds/6208d7f5-3e14-4e81-87a1-584f0d54c259
+
+3) CLICK INSTALL (by built artifact)
+
+4) WAIT FOR THE BROWSER TO FINISH DOWNLOADING.
+
+5) CLICK ON THE DOANLOADED FILE
+
+6) INSTALL IT - IF IT ASKS - CLICK "INSTALL"
+
+7) WAIT FOR THE PHONE TO INSTALL IT
+
+8) SCAN THE APP TO INSTALL (if it shows up)
+
+9) WAIT FOR IT TO BE DONE SCANNING... (do not click anything yet)
+
+10) CLICK "INSTALL" AFTER SCAN IS DONE
+
+11) WAIT FOR IT TO FINISH INSTALLING (again)
+
+12) CLICK "OPEN" WHEN DONE
+
+13) PRAY TO GOD IT WORKS
