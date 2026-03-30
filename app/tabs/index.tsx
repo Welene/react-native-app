@@ -89,7 +89,7 @@ export default function HomeScreen() {
 					onPress={() =>
 						router.navigate('/tabs/projects?newProject=true')
 					}
-					style={styles.button}>
+					style={[styles.button, styles.shadowBox]}>
 					<LinearGradient
 						colors={['#ffc26d', '#fc8ed2']}
 						start={{ x: 0, y: 0 }}
@@ -111,10 +111,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
 	heading: {
 		color: 'black',
-		fontFamily: 'Times New Roman',
 		fontSize: 25,
 		marginTop: 30,
-		marginBottom: 20,
+		marginBottom: 35,
+		fontFamily: 'LibreBaskerville_400Regular',
+		letterSpacing: 1.2,
 	},
 	image: {
 		width: '100%',
@@ -154,5 +155,12 @@ const styles = StyleSheet.create({
 	gradient: {
 		padding: 22,
 		alignItems: 'center',
+	},
+	shadowBox: {
+		// iOS
+		shadowColor: '#000',
+
+		// Android
+		elevation: 4,
 	},
 });

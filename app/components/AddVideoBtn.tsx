@@ -1,18 +1,11 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { addVideoBtn } from '../props';
 
-export function AddVideoBtn({ label, onPress }: addVideoBtn) {
+export function AddVideoBtn({ onPress }: addVideoBtn) {
 	return (
 		<Pressable style={styles.addButton} onPress={onPress}>
-			<LinearGradient
-				colors={['#ffc26d', '#fc8ed2']}
-				start={{ x: 0, y: 0 }}
-				end={{ x: 1, y: 0 }}
-				style={styles.gradient}>
-				<Text style={styles.buttonText}>+</Text>
-			</LinearGradient>
+			<Text style={styles.buttonText}>+</Text>
 		</Pressable>
 	);
 }
@@ -25,17 +18,24 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		marginTop: 20,
 		marginBottom: 20,
-		right: 20,
+		paddingBottom: 4,
+		position: 'absolute',
+		bottom: 0,
+		right: 15,
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
 		overflow: 'hidden',
+		backgroundColor: 'pink',
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 3 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 4,
 	},
 	buttonText: {
 		color: 'white',
-		fontSize: 30,
+		fontSize: 25,
 		fontWeight: 'bold',
-	},
-	gradient: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
 	},
 });
