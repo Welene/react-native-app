@@ -1,23 +1,5 @@
-# My First Native App
+# HOW TO GET APP
 
-
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start / npx expo start --tunnel
-   ```
-
-Open the app on phone:
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1) GET AN ANDROID.
+2) DOWNLOAD APP APK FROM: https://we.tl/t-AgBqsOydWw7QWnjg
+3) (hold on let me just download myself and see what on Earth to do... :--) )
