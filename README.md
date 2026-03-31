@@ -28,7 +28,23 @@ PUBLIC_SUPABASE_ANON_KEY=sb_publishable_BqfwvGpgGDh7s4nnK8RGjw_xV1_qQg9
 * om den absolut inte vill starta med --tunnel, stäng ner terminalen, öppna upp en ny terminal och kör kommando tills det fungerar (kan ta ett tag, måste ha tur!)
 
 
-
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
 
 
 
