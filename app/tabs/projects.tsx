@@ -211,6 +211,7 @@ export default function TabTwoScreen() {
 			setIsPlayingTimeline(false);
 			setMuted(false);
 			setPlayingMiniClip(null);
+			setCurrentProjectId(null); // RESET PROJECT BUG FIX
 		} else if (projectId) {
 			// load existing project instead of empty edit page
 			(async () => {
@@ -222,6 +223,7 @@ export default function TabTwoScreen() {
 					setCurrentlyClicked(
 						project.clips[project.clips.length - 1] ?? null,
 					);
+					setCurrentProjectId(projectId); // RESET PROJECT BUG FIX
 				}
 			})();
 		}
