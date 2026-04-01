@@ -1,4 +1,4 @@
-# HOW TO GET APP
+# GUIDE TILL TEST AV APP:
 
 Testing through Expo Go
 1) git clone https://github.com/Welene/react-native-app.git
@@ -27,32 +27,20 @@ PUBLIC_SUPABASE_ANON_KEY=sb_publishable_BqfwvGpgGDh7s4nnK8RGjw_xV1_qQg9
 
 * om den absolut inte vill starta med --tunnel, stäng ner terminalen, öppna upp en ny terminal och kör kommando tills det fungerar (kan ta ett tag, måste ha tur!)
 
+..................................................................................................................................................................
 
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
+# LÄNK TILL FIGMA:
+https://www.figma.com/design/5VUBHSrRiEQXtAEaBkdOre/React-Native?node-id=0-1&t=mK5koi0Js0EfrNYq-0
 
+Figma har design, planering, samt github projects länk!
 
+..................................................................................................................................................................
 
+TEST-ALTERNATIV :
 
+How to download app:
+(This version in broken apparently.) Follow the guide above:
 
-
-How to download app -
-This version in broken apparently. Follow the guide above:
 1) GET AN ANDROID.
 
 2) TURN ON LIGHT MODE ON YOUR PHONE (or just turn off dark mode)
