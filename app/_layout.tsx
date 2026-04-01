@@ -2,7 +2,8 @@ import {
 	LibreBaskerville_400Regular,
 	useFonts,
 } from '@expo-google-fonts/libre-baskerville';
-import { Stack } from 'expo-router';
+import * as Linking from 'expo-linking';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
@@ -10,11 +11,20 @@ import RegisterLoginPage from './modal';
 
 export default function RootLayout() {
 	const [session, setSession] = useState<any>(null);
+	const [fontsLoaded] = useFonts({ LibreBaskerville_400Regular });
+	const [initialUrl, setInitialUrl] = useState<string | null>(null);
+	const router = useRouter();
 
-	const [fontsLoaded] = useFonts({
-		LibreBaskerville_400Regular,
-	});
+	useEffect(() => {
+		const getInitialUrl = async () => {
+			const url = await Linking.getInitialURL();
+			console.log('Initial deep link URL:', url);
+			setInitialUrl(url);
+		};
+		getInitialUrl();
+	}, []);
 
+	// Check Supabase session
 	useEffect(() => {
 		const checkSession = async () => {
 			const { data } = await supabase.auth.getSession();
@@ -23,7 +33,6 @@ export default function RootLayout() {
 			if (!session) return setSession(null);
 
 			const { data: userData, error } = await supabase.auth.getUser();
-
 			if (error || !userData.user) {
 				await supabase.auth.signOut();
 				setSession(null);
@@ -42,7 +51,17 @@ export default function RootLayout() {
 	}, []);
 
 	if (!fontsLoaded) return null;
-	if (!session) return <RegisterLoginPage />;
+
+	// Show modal first if no session
+	if (!session) {
+		return (
+			<RegisterLoginPage
+				onLoginSuccess={() => {
+					router.replace('/tabs');
+				}}
+			/>
+		);
+	}
 
 	return (
 		<>

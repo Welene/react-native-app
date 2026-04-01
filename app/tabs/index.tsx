@@ -7,10 +7,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router'; // for onPress nav to a different tab
 import { useCallback, useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { Project } from '../../lib/props';
 import logo from '../assets/logo/min5.png';
 import nature from '../assets/logo/MockupImg.png';
 import Header from '../components/Header';
-import { Project } from '../props';
 
 export default function HomeScreen() {
 	const router = useRouter();

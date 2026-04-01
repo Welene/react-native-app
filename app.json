@@ -6,11 +6,24 @@
 		"platforms": ["ios", "android", "web"],
 		"orientation": "portrait",
 		"scheme": "mymillionthnativeapp",
-		"userInterfaceStyle": "automatic",
+		"userInterfaceStyle": "light",
 		"plugins": ["expo-router", "expo-video"],
 		"extra": {
 			"supabaseUrl": "https://ihnxtbxrerswuxygjind.supabase.co",
-			"supabaseAnonKey": "sb_publishable_BqfwvGpgGDh7s4nnK8RGjw_xV1_qQg9"
+			"supabaseAnonKey": "sb_publishable_BqfwvGpgGDh7s4nnK8RGjw_xV1_qQg9",
+			"router": {},
+			"eas": {
+				"projectId": "13f23be9-4e9a-48a4-9ad1-cddec2495260"
+			}
+		},
+		"android": {
+			"package": "com.welene.minmin"
+		},
+		"ios": {
+			"bundleIdentifier": "com.welene.minmin",
+			"infoPlist": {
+				"ITSAppUsesNonExemptEncryption": false
+			}
 		}
 	}
 }
